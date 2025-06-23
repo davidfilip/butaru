@@ -1,6 +1,5 @@
 // Physical memory allocator, for user processes,
-// kernel stacks, page-table pages,
-// and pipe buffers. Allocates whole 4096-byte pages.
+// kernel stacks and page-table pages. Allocates whole 4096-byte pages.
 
 #include "types.h"
 #include "param.h"

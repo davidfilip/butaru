@@ -2,7 +2,6 @@ struct buf;
 struct context;
 struct file;
 struct inode;
-struct pipe;
 struct proc;
 struct spinlock;
 struct sleeplock;
@@ -66,12 +65,6 @@ void            initlog(int, struct superblock*);
 void            log_write(struct buf*);
 void            begin_op(void);
 void            end_op(void);
-
-// pipe.c
-int             pipealloc(struct file**, struct file**);
-void            pipeclose(struct pipe*, int);
-int             piperead(struct pipe*, uint64, int);
-int             pipewrite(struct pipe*, uint64, int);
 
 // printf.c
 void            printf(char*, ...);
