@@ -1,7 +1,6 @@
 #include "types.h"
 #include "aarch64.h"
 #include "defs.h"
-#include "date.h"
 #include "param.h"
 #include "memlayout.h"
 #include "spinlock.h"
