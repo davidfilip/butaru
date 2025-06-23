@@ -14,9 +14,7 @@ void psci_call(uint64 fn, int cpuid, uint64 entry, uint64 ctxid);
 void delay(uint32 c);
 
 // start() jumps here in EL1 on all CPUs.
-void
-main()
-{
+void main() {
   if(cpuid() == 0){
     for(int i = 1; i < NCPU; i++)   // wakeup other processors
       psci_call(PSCI_CPUON, i, V2P(_entry), 0);

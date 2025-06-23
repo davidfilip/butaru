@@ -14,16 +14,12 @@ void alltraps();
 
 extern int devintr();
 
-void
-trapinit(void)
-{
+void trapinit(void) {
   initlock(&tickslock, "time");
 }
 
 // set up to take exceptions and traps.
-void
-trapinithart(void)
-{
+void trapinithart(void) {
   w_vbar_el1((uint64)alltraps);
 }
 
@@ -31,10 +27,7 @@ trapinithart(void)
 // handle an interrupt, exception, or system call from user space.
 // called from uservec.S
 //
-
-void
-userirq(void)
-{
+void userirq(void) {
   struct proc *p = myproc();
 
   int which_dev = devintr();
@@ -48,9 +41,7 @@ userirq(void)
   intr_off();
 }
 
-void
-usertrap(void)
-{
+void usertrap(void) {
   struct proc *p = myproc();
 
   uint64 ec = (r_esr_el1() >> 26) & 0x3f;
@@ -79,9 +70,7 @@ usertrap(void)
 
 // interrupts and exceptions from kernel code go here via kernelvec,
 // on whatever the current kernel stack is.
-void 
-kerneltrap()
-{
+void  kerneltrap() {
   uint64 esr = r_esr_el1();
   w_esr_el1(0);
   
@@ -95,9 +84,7 @@ kerneltrap()
   panic("kerneltrap");
 }
 
-void
-kernelirq()
-{
+void kernelirq() {
   int which_dev = devintr();
 
   // give up the CPU if this is a timer interrupt.
@@ -105,10 +92,7 @@ kernelirq()
     yield();
 }
 
-
-void
-clockintr()
-{
+void clockintr() {
   acquire(&tickslock);
   ticks++;
   wakeup(&ticks);
@@ -119,9 +103,7 @@ clockintr()
 // returns 2 if timer interrupt,
 // 1 if other device,
 // 0 if not recognized.
-int
-devintr()
-{
+int devintr() {
   uint32 iar = gic_iar();
   uint32 irq = gic_iar_irq(iar);
   int dev = 0;
@@ -151,4 +133,3 @@ devintr()
 
   return dev;
 }
-

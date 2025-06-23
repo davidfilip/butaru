@@ -22,22 +22,16 @@ struct {
   struct run *freelist;
 } kmem;
 
-void
-kinit1(void *vstart, void *vend)
-{
+void kinit1(void *vstart, void *vend) {
   initlock(&kmem.lock, "kmem");
   freerange(vstart, vend);
 }
 
-void
-kinit2(void *vstart, void *vend)
-{
+void kinit2(void *vstart, void *vend) {
   freerange(vstart, vend);
 }
 
-void
-freerange(void *vstart, void *vend)
-{
+void freerange(void *vstart, void *vend) {
   char *p;
   p = (char*)PGROUNDUP((uint64)vstart);
   for(; p + PGSIZE <= (char*)vend; p += PGSIZE)
@@ -48,9 +42,7 @@ freerange(void *vstart, void *vend)
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
 // initializing the allocator; see kinit above.)
-void
-kfree(void *va)
-{
+void kfree(void *va) {
   struct run *r;
 
   if(((uint64)va % PGSIZE) != 0 || (char*)va < end || (uint64)va >= (uint64)P2V(PHYSTOP))
@@ -70,9 +62,7 @@ kfree(void *va)
 // Allocate one 4096-byte page of physical memory.
 // Returns a pointer that the kernel can use.
 // Returns 0 if the memory cannot be allocated.
-void *
-kalloc(void)
-{
+void * kalloc(void) {
   struct run *r;
 
   acquire(&kmem.lock);
