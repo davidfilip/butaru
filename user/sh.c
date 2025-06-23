@@ -7,9 +7,8 @@
 // Parsed command representation
 #define EXEC  1
 #define REDIR 2
-#define PIPE  3
-#define LIST  4
-#define BACK  5
+#define LIST  3
+#define BACK  4
 
 #define MAXARGS 10
 
@@ -32,12 +31,6 @@ struct redircmd {
   int fd;
 };
 
-struct pipecmd {
-  int type;
-  struct cmd *left;
-  struct cmd *right;
-};
-
 struct listcmd {
   int type;
   struct cmd *left;
@@ -56,11 +49,9 @@ void runcmd(struct cmd*) __attribute__((noreturn));
 
 // Execute cmd.  Never returns.
 void runcmd(struct cmd *cmd) {
-  int p[2];
   struct backcmd *bcmd;
   struct execcmd *ecmd;
   struct listcmd *lcmd;
-  struct pipecmd *pcmd;
   struct redircmd *rcmd;
 
   if(cmd == 0)
@@ -94,30 +85,6 @@ void runcmd(struct cmd *cmd) {
       runcmd(lcmd->left);
     wait(0);
     runcmd(lcmd->right);
-    break;
-
-  case PIPE:
-    pcmd = (struct pipecmd*)cmd;
-    if(pipe(p) < 0)
-      panic("pipe");
-    if(fork1() == 0){
-      close(1);
-      dup(p[1]);
-      close(p[0]);
-      close(p[1]);
-      runcmd(pcmd->left);
-    }
-    if(fork1() == 0){
-      close(0);
-      dup(p[0]);
-      close(p[0]);
-      close(p[1]);
-      runcmd(pcmd->right);
-    }
-    close(p[0]);
-    close(p[1]);
-    wait(0);
-    wait(0);
     break;
 
   case BACK:
@@ -203,17 +170,6 @@ struct cmd* redircmd(struct cmd *subcmd, char *file, char *efile, int mode, int 
   return (struct cmd*)cmd;
 }
 
-struct cmd* pipecmd(struct cmd *left, struct cmd *right) {
-  struct pipecmd *cmd;
-
-  cmd = malloc(sizeof(*cmd));
-  memset(cmd, 0, sizeof(*cmd));
-  cmd->type = PIPE;
-  cmd->left = left;
-  cmd->right = right;
-  return (struct cmd*)cmd;
-}
-
 struct cmd* listcmd(struct cmd *left, struct cmd *right) {
   struct listcmd *cmd;
 
@@ -292,7 +248,6 @@ int peek(char **ps, char *es, char *toks) {
 }
 
 struct cmd *parseline(char**, char*);
-struct cmd *parsepipe(char**, char*);
 struct cmd *parseexec(char**, char*);
 struct cmd *nulterminate(struct cmd*);
 
@@ -314,7 +269,7 @@ struct cmd* parsecmd(char *s) {
 struct cmd* parseline(char **ps, char *es) {
   struct cmd *cmd;
 
-  cmd = parsepipe(ps, es);
+  cmd = parseexec(ps, es);
   while(peek(ps, es, "&")){
     gettoken(ps, es, 0, 0);
     cmd = backcmd(cmd);
@@ -322,17 +277,6 @@ struct cmd* parseline(char **ps, char *es) {
   if(peek(ps, es, ";")){
     gettoken(ps, es, 0, 0);
     cmd = listcmd(cmd, parseline(ps, es));
-  }
-  return cmd;
-}
-
-struct cmd* parsepipe(char **ps, char *es) {
-  struct cmd *cmd;
-
-  cmd = parseexec(ps, es);
-  if(peek(ps, es, "|")){
-    gettoken(ps, es, 0, 0);
-    cmd = pipecmd(cmd, parsepipe(ps, es));
   }
   return cmd;
 }
@@ -411,7 +355,6 @@ struct cmd* nulterminate(struct cmd *cmd) {
   struct backcmd *bcmd;
   struct execcmd *ecmd;
   struct listcmd *lcmd;
-  struct pipecmd *pcmd;
   struct redircmd *rcmd;
 
   if(cmd == 0)
@@ -428,12 +371,6 @@ struct cmd* nulterminate(struct cmd *cmd) {
     rcmd = (struct redircmd*)cmd;
     nulterminate(rcmd->cmd);
     *rcmd->efile = 0;
-    break;
-
-  case PIPE:
-    pcmd = (struct pipecmd*)cmd;
-    nulterminate(pcmd->left);
-    nulterminate(pcmd->right);
     break;
 
   case LIST:
