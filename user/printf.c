@@ -6,15 +6,11 @@
 
 static char digits[] = "0123456789ABCDEF";
 
-static void
-putc(int fd, char c)
-{
+static void putc(int fd, char c) {
   write(fd, &c, 1);
 }
 
-static void
-printint(int fd, int xx, int base, int sgn)
-{
+static void printint(int fd, int xx, int base, int sgn) {
   char buf[16];
   int i, neg;
   uint x;
@@ -48,9 +44,7 @@ printptr(int fd, uint64 x) {
 }
 
 // Print to the given fd. Only understands %d, %x, %p, %s.
-void
-vprintf(int fd, const char *fmt, va_list ap)
-{
+void vprintf(int fd, const char *fmt, va_list ap) {
   char *s;
   int c, i, state;
 
@@ -94,18 +88,14 @@ vprintf(int fd, const char *fmt, va_list ap)
   }
 }
 
-void
-fprintf(int fd, const char *fmt, ...)
-{
+void fprintf(int fd, const char *fmt, ...) {
   va_list ap;
 
   va_start(ap, fmt);
   vprintf(fd, fmt, ap);
 }
 
-void
-printf(const char *fmt, ...)
-{
+void printf(const char *fmt, ...) {
   va_list ap;
 
   va_start(ap, fmt);
