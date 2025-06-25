@@ -41,6 +41,9 @@
 
 #define TIMER0_IRQ  27
 
+// QEMU test interface. Used for poweroff and on.
+#define QEMU_POWER 0x100000
+
 // interrupt controller GICv3
 #define GICV3         (KERNBASE + 0x08000000L)
 #define GICV3_REDIST  (KERNBASE + 0x080a0000L)

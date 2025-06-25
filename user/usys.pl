@@ -32,3 +32,4 @@ entry("sbrk");
 entry("sleep");
 entry("uptime");
 entry("procdump");
+entry("shutdown");

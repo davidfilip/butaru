@@ -566,3 +566,9 @@ void procdump(void) {
     printf("\n");
   }
 }
+
+void shutdown(void) {
+  printf("Powering off...\n");
+  (*(volatile uint32 *) 0x100000) = 0x5555;
+  panic("sys_poweroff");
+}

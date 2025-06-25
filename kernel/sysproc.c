@@ -83,3 +83,9 @@ uint64 sys_procdump(void) {
   procdump();
   return 0;
 }
+
+// FIXME: platform specific for QEMU only
+uint64 sys_shutdown(void) {
+  shutdown();
+  return 0; // never reached
+}

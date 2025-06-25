@@ -88,6 +88,7 @@ extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_procdump(void);
+extern uint64 sys_shutdown(void);
 
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]     sys_fork,
@@ -106,7 +107,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_write]    sys_write,
 [SYS_mknod]    sys_mknod,
 [SYS_close]    sys_close,
-[SYS_procdump] sys_procdump, 
+[SYS_procdump] sys_procdump,
+[SYS_shutdown] sys_shutdown,
 };
 
 void syscall(void) {
