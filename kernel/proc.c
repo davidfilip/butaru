@@ -569,6 +569,6 @@ void procdump(void) {
 
 void shutdown(void) {
   printf("Powering off...\n");
-  (*(volatile uint32 *) 0x100000) = 0x5555;
+  (*(volatile uint32 *) QEMU_POWER) = 0x5555;
   panic("sys_poweroff");
 }
