@@ -118,6 +118,7 @@ UPROGS=\
 	$U/_kill\
 	$U/_ls\
 	$U/_sh\
+	$U/_ps\
 
 fs.img: mkfs/mkfs LICENSE $(UPROGS)
 	mkfs/mkfs fs.img LICENSE $(UPROGS)
