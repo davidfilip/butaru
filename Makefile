@@ -96,7 +96,7 @@ UPROGS=\
 	$U/_ps\
 	$U/_shutdown\
 
-fs.img: mkfs/mkfs LICENSE $(UPROGS)
+$B/fs.img: mkfs/mkfs LICENSE $(UPROGS)
 	mkfs/mkfs $B/fs.img LICENSE $(UPROGS)
 
 -include kernel/*.d user/*.d
@@ -115,8 +115,5 @@ QEMUOPTS = -cpu cortex-a72 -machine virt,gic-version=3 -kernel $B/kernel -m 128M
 QEMUOPTS += -drive file=$B/fs.img,if=none,format=raw,id=x0
 QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
-qemu: $B/kernel fs.img
-	$(QEMU) $(QEMUOPTS)
-
-run:
+qemu: $B/kernel $B/fs.img
 	$(QEMU) $(QEMUOPTS)
