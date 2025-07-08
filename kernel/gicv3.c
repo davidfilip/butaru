@@ -107,8 +107,6 @@ static void gicdinit() {
   uint32 typer = gicd_read(D_TYPER);
   uint32 lines = typer & 0x1f;
 
-  printf("lines %d\n", lines);
-
   for(int i = 0; i < lines; i++)
     gicd_write(D_IGROUPR(i), ~0);
 }
