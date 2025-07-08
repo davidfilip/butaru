@@ -10,5 +10,8 @@ Butaru is personal study into operation systems, code organisation and build sys
 
 ### Build Instructions
 
-`make qemu` - to compile and run Butaru in Qemu
-`make clean` - cleanup temp files
+1. Create build-aarch64 directory in butaru root
+
+2. Run make:
+  `make qemu` - to compile and run Butaru in Qemu
+  `make clean` - cleanup temp files
