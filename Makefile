@@ -101,14 +101,6 @@ $B/fs.img: mkfs/mkfs LICENSE $(UPROGS)
 
 -include kernel/*.d user/*.d
 
-clean: 
-	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	*/*.o */*.d */*.asm */*.sym \
-	$U/initcode $U/initcode.out $B/kernel $B/fs.img \
-	mkfs/mkfs .gdbinit \
-        $U/usys.S \
-	$(UPROGS)
-
 CPUS := 4
 
 QEMUOPTS = -cpu cortex-a72 -machine virt,gic-version=3 -kernel $B/kernel -m 128M -smp $(CPUS) -nographic
@@ -117,3 +109,9 @@ QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 qemu: $B/kernel $B/fs.img
 	$(QEMU) $(QEMUOPTS)
+
+clean: 
+	rm -f */*.o */*.d */*.asm */*.sym \
+	$U/usys.S $U/initcode $U/initcode.out \
+	$B/kernel $B/fs.img \
+	mkfs/mkfs $(UPROGS) \
