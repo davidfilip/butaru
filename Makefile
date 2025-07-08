@@ -43,8 +43,7 @@ TOOLPREFIX := $(shell if aarch64-unknown-elf-objdump -i 2>&1 | grep 'elf64-big' 
 	echo "***" 1>&2; exit 1; fi)
 endif
 
-#QEMUPREFIX = ~/qemu/build/
-QEMU = $(QEMUPREFIX)qemu-system-aarch64
+QEMU = qemu-system-aarch64
 
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
@@ -57,14 +56,6 @@ CFLAGS += -MD
 CFLAGS += -ffreestanding -fno-common -nostdlib
 CFLAGS += -I.
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
-
-# Disable PIE when possible (for Ubuntu 16.10 toolchain)
-ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-CFLAGS += -fno-pie -no-pie
-endif
-ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-CFLAGS += -fno-pie -nopie
-endif
 
 LDFLAGS = -z max-page-size=4096
 ASFLAGS = -Og -ggdb -mcpu=cortex-a72 -MD -I.
@@ -80,9 +71,6 @@ $U/initcode: $U/initcode.S
 	$(OBJCOPY) -S -O binary $U/initcode.out $U/initcode
 	$(OBJDUMP) -S $U/initcode.o > $U/initcode.asm
 
-tags: $(OBJS) _init
-	etags *.S *.c
-
 ULIB = $U/ulib.o $U/usys.o $U/printf.o $U/umalloc.o
 
 _%: %.o $(ULIB)
@@ -95,12 +83,6 @@ $U/usys.S : $U/usys.pl
 
 $U/usys.o : $U/usys.S
 	$(CC) $(CFLAGS) -c -o $U/usys.o $U/usys.S
-
-$U/_forktest: $U/forktest.o $(ULIB)
-	# forktest has less library code linked in - needs to be small
-	# in order to be able to max out the proc table.
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_forktest $U/forktest.o $U/ulib.o $U/usys.o
-	$(OBJDUMP) -S $U/_forktest > $U/forktest.asm
 
 mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 	gcc -Werror -Wall -I. -o mkfs/mkfs mkfs/mkfs.c
@@ -134,15 +116,7 @@ clean:
         $U/usys.S \
 	$(UPROGS)
 
-# try to generate a unique GDB port
-GDBPORT = $(shell expr `id -u` % 5000 + 25000)
-# QEMU's gdb stub command line changed in 0.11
-QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
-	then echo "-gdb tcp::$(GDBPORT)"; \
-	else echo "-s -p $(GDBPORT)"; fi)
-ifndef CPUS
 CPUS := 4
-endif
 
 QEMUOPTS = -cpu cortex-a72 -machine virt,gic-version=3 -kernel $K/kernel -m 128M -smp $(CPUS) -nographic
 QEMUOPTS += -drive file=fs.img,if=none,format=raw,id=x0
@@ -150,11 +124,3 @@ QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 qemu: $K/kernel fs.img
 	$(QEMU) $(QEMUOPTS)
-
-.gdbinit: .gdbinit.tmpl-aarch64
-	sed "s/:1234/:$(GDBPORT)/" < $^ > $@
-
-qemu-gdb: $K/kernel .gdbinit fs.img
-	@echo "*** Now run 'gdb' in another window." 1>&2
-	$(QEMU) $(QEMUOPTS) -S $(QEMUGDB)
-
