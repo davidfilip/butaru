@@ -1,5 +1,5 @@
 K=kernel
-U=user
+S=system
 B=build-aarch64
 
 OBJS = \
@@ -59,23 +59,23 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 LDFLAGS = -z max-page-size=4096
 ASFLAGS = -Og -ggdb -mcpu=cortex-a72 -MD -I.
 
-$B/kernel: $(OBJS) $K/kernel.ld $U/initcode
+$B/kernel: $(OBJS) $K/kernel.ld $S/initcode
 	$(LD) $(LDFLAGS) -T $K/kernel.ld -o $B/kernel $(OBJS)
 
-$U/initcode: $U/initcode.S
-	$(CC) $(CFLAGS) -nostdinc -I. -Ikernel -c $U/initcode.S -o $U/initcode.o
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $U/initcode.out $U/initcode.o
+$S/initcode: $S/initcode.S
+	$(CC) $(CFLAGS) -nostdinc -I. -Ikernel -c $S/initcode.S -o $S/initcode.o
+	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $S/initcode.out $S/initcode.o
 
-ULIB = $U/ulib.o $U/usys.o $U/printf.o $U/umalloc.o
+ULIB = $S/ulib.o $S/usys.o $S/printf.o $S/umalloc.o
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 
-$U/usys.S : $U/usys.pl
-	perl $U/usys.pl > $U/usys.S
+$S/usys.S : $S/usys.pl
+	perl $S/usys.pl > $S/usys.S
 
-$U/usys.o : $U/usys.S
-	$(CC) $(CFLAGS) -c -o $U/usys.o $U/usys.S
+$S/usys.o : $S/usys.S
+	$(CC) $(CFLAGS) -c -o $S/usys.o $S/usys.S
 
 mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 	gcc -Werror -Wall -I. -o mkfs/mkfs mkfs/mkfs.c
@@ -87,19 +87,19 @@ mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 .PRECIOUS: %.o
 
 UPROGS=\
-	$U/_cat\
-	$U/_echo\
-	$U/_init\
-	$U/_kill\
-	$U/_ls\
-	$U/_sh\
-	$U/_ps\
-	$U/_shutdown\
+	$S/_cat\
+	$S/_echo\
+	$S/_init\
+	$S/_kill\
+	$S/_ls\
+	$S/_sh\
+	$S/_ps\
+	$S/_shutdown\
 
 $B/fs.img: mkfs/mkfs LICENSE $(UPROGS)
 	mkfs/mkfs $B/fs.img LICENSE $(UPROGS)
 
--include kernel/*.d user/*.d
+-include kernel/*.d system/*.d
 
 CPUS := 4
 
@@ -112,6 +112,6 @@ qemu: $B/kernel $B/fs.img
 
 clean: 
 	rm -f */*.o */*.d */*.asm */*.sym \
-	$U/usys.S $U/initcode $U/initcode.out \
+	$S/usys.S $S/initcode $S/initcode.out \
 	$B/kernel $B/fs.img \
 	mkfs/mkfs $(UPROGS) \

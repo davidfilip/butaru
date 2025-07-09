@@ -1,5 +1,5 @@
 #include "kernel/types.h"
-#include "user/user.h"
+#include "system/user.h"
 
 char buf[512];
 

@@ -128,10 +128,10 @@ main(int argc, char *argv[])
   iappend(rootino, &de, sizeof(de));
 
   for(i = 2; i < argc; i++){
-    // get rid of "user/"
+    // get rid of "system/"
     char *shortname;
-    if(strncmp(argv[i], "user/", 5) == 0)
-      shortname = argv[i] + 5;
+    if(strncmp(argv[i], "system/", 7) == 0)
+      shortname = argv[i] + 7;
     else
       shortname = argv[i];
     
