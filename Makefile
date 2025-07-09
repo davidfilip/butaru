@@ -77,8 +77,8 @@ $S/usys.S : $S/usys.pl
 $S/usys.o : $S/usys.S
 	$(CC) $(CFLAGS) -c -o $S/usys.o $S/usys.S
 
-mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
-	gcc -Werror -Wall -I. -o mkfs/mkfs mkfs/mkfs.c
+tools/mkfs: tools/mkfs.c $K/fs.h $K/param.h
+	gcc -Werror -Wall -I. -o tools/mkfs tools/mkfs.c
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
 # that disk image changes after first build are persistent until clean.  More
@@ -96,8 +96,8 @@ UPROGS=\
 	$S/_ps\
 	$S/_shutdown\
 
-$B/fs.img: mkfs/mkfs LICENSE $(UPROGS)
-	mkfs/mkfs $B/fs.img LICENSE $(UPROGS)
+$B/fs.img: tools/mkfs LICENSE $(UPROGS)
+	tools/mkfs $B/fs.img LICENSE $(UPROGS)
 
 -include kernel/*.d system/*.d
 
@@ -114,4 +114,4 @@ clean:
 	rm -f */*.o */*.d */*.asm */*.sym \
 	$S/usys.S $S/initcode $S/initcode.out \
 	$B/kernel $B/fs.img \
-	mkfs/mkfs $(UPROGS) \
+	tools/mkfs $(UPROGS) \
