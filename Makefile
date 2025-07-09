@@ -66,7 +66,8 @@ $S/initcode: $S/initcode.S
 	$(CC) $(CFLAGS) -nostdinc -I. -Ikernel -c $S/initcode.S -o $S/initcode.o
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $S/initcode.out $S/initcode.o
 
-ULIB = $S/ulib.o $S/usys.o $S/printf.o $S/umalloc.o
+UPROGS = $(addprefix $S/_, cat echo init kill ls sh ps shutdown)
+ULIB = $(addprefix $S/ulib/, ulib.o usys.o printf.o umalloc.o)
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
@@ -74,8 +75,8 @@ _%: %.o $(ULIB)
 $S/usys.S : $S/usys.pl
 	perl $S/usys.pl > $S/usys.S
 
-$S/usys.o : $S/usys.S
-	$(CC) $(CFLAGS) -c -o $S/usys.o $S/usys.S
+$S/ulib/usys.o : $S/usys.S
+	$(CC) $(CFLAGS) -c -o $S/ulib/usys.o $S/usys.S
 
 tools/mkfs: tools/mkfs.c $K/fs.h $K/param.h
 	gcc -Werror -Wall -I. -o tools/mkfs tools/mkfs.c
@@ -85,16 +86,6 @@ tools/mkfs: tools/mkfs.c $K/fs.h $K/param.h
 # details:
 # http://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 .PRECIOUS: %.o
-
-UPROGS=\
-	$S/_cat\
-	$S/_echo\
-	$S/_init\
-	$S/_kill\
-	$S/_ls\
-	$S/_sh\
-	$S/_ps\
-	$S/_shutdown\
 
 $B/fs.img: tools/mkfs LICENSE $(UPROGS)
 	tools/mkfs $B/fs.img LICENSE $(UPROGS)
@@ -113,5 +104,6 @@ qemu: $B/kernel $B/fs.img
 clean: 
 	rm -f */*.o */*.d */*.asm */*.sym \
 	$S/usys.S $S/initcode $S/initcode.out \
+	$S/ulib/*.o, $S/ulib/*.d \
 	$B/kernel $B/fs.img \
 	tools/mkfs $(UPROGS) \
