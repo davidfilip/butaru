@@ -72,9 +72,6 @@ ULIB = $(addprefix $S/ulib/, ulib.o usys.o printf.o umalloc.o)
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 
-$S/usys.S : $S/usys.pl
-	perl $S/usys.pl > $S/usys.S
-
 $S/ulib/usys.o : $S/usys.S
 	$(CC) $(CFLAGS) -c -o $S/ulib/usys.o $S/usys.S
 
@@ -103,7 +100,7 @@ qemu: $B/kernel $B/fs.img
 
 clean: 
 	rm -f */*.o */*.d */*.asm */*.sym \
-	$S/usys.S $S/initcode $S/initcode.out \
+	$S/initcode $S/initcode.out \
 	$S/ulib/*.o, $S/ulib/*.d \
 	$B/kernel $B/fs.img \
 	tools/mkfs $(UPROGS) \
